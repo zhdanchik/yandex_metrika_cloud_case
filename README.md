@@ -1,4 +1,4 @@
-# Получение данных через `Logs API` и pагрузка в `ClickHouse`
+# Получение данных через `Logs API` и загрузка в `ClickHouse`
 
 ## Logs API
 
