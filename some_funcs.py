@@ -39,14 +39,119 @@ class simple_ch_client():
             return result
         else:
             raise ValueError(r.text)
-            
-# Простая функция для построения графиков в plotly 
 
-from plotly import __version__
+import plotly
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 from plotly import graph_objs as go
+init_notebook_mode(connected=True)
 
-init_notebook_mode(connected = True)
+# Функция для построения воронок в notebook'е
+
+colors = colors = ['#d54936', '#faca34', '#437cba', '#8bc34a', '#795548', '#309688', '#000000', '#40bcd4', '#9e9e9e', '#3ca9f4']
+
+def plot_funnel(phases, values):
+    n_phase = len(phases)
+    plot_width = 500.
+
+    # height of a section and difference between sections 
+    section_h = 100
+    section_d = 10
+
+    # multiplication factor to calculate the width of other sections
+    unit_width = plot_width / max(values)
+
+    # width of each funnel section relative to the plot width
+    phase_w = [int(value * unit_width) for value in values]
+    print (phase_w)
+
+    # plot height based on the number of sections and the gap in between them
+    height = section_h * n_phase + section_d * (n_phase - 1)
+    
+    # list containing all the plot shapes
+    shapes = []
+
+    # list containing the Y-axis location for each section's name and value text
+    label_y = []
+
+    for i in range(n_phase):
+            if (i == n_phase-1):
+                    points = [phase_w[i] / 2, height, phase_w[i] / 2, height - section_h]
+            else:
+                    points = [phase_w[i] / 2, height, phase_w[i+1] / 2, height - section_h]
+
+            path = 'M {0} {1} L {2} {3} L -{2} {3} L -{0} {1} Z'.format(*points)
+
+            shape = {
+                    'type': 'path',
+                    'path': path,
+                    'fillcolor': colors[i],
+                    'line': {
+                        'width': 1,
+                        'color': colors[i]
+                    }
+            }
+            shapes.append(shape)
+
+            # Y-axis location for this section's details (text)
+            label_y.append(height - (section_h / 2))
+
+            height = height - (section_h + section_d)
+
+    # For phase names
+    label_trace = go.Scatter(
+        x=[-350]*n_phase,
+        y=label_y,
+        mode='text',
+        text=phases,
+        textfont=dict(
+            color='rgb(40,40,40)',
+            size=15
+        )
+    )
+
+    # For phase values
+    value_trace = go.Scatter(
+        x=[350]*n_phase,
+        y=label_y,
+        mode='text',
+        text=values,
+        textfont=dict(
+            color='rgb(40,40,40)',
+            size=15
+        )
+    )
+
+    data = [label_trace, value_trace]
+
+    layout = go.Layout(
+        title="<b>Funnel Chart</b>",
+        titlefont=dict(
+            size=20,
+            color='rgb(0,0,0)'
+        ),
+        shapes=shapes,
+        height=560,
+        width=800,
+        showlegend=False,
+        paper_bgcolor='rgba(255,255,255,1)',
+        plot_bgcolor='rgba(255,255,255,1)',
+        xaxis=dict(
+            showticklabels=False,
+            zeroline=False,
+            showgrid=False,
+            range=[-450, 450]
+        ),
+        yaxis=dict(
+            showticklabels=False,
+            zeroline=False,
+            showgrid=False
+        )
+    )
+
+    fig = go.Figure(data=data, layout=layout)
+    iplot(fig, show_link=False)
+
+# Простая функция для построения графиков в plotly 
 
 def plotly_df(df, title = ''):
     data = []
