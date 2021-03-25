@@ -47,7 +47,7 @@ init_notebook_mode(connected=True)
 
 # Функция для построения воронок в notebook'е
 
-colors = colors = ['#d54936', '#faca34', '#437cba', '#8bc34a', '#795548', '#309688', '#000000', '#40bcd4', '#9e9e9e', '#3ca9f4']
+colors = ['#d54936', '#faca34', '#437cba', '#8bc34a', '#795548', '#309688', '#000000', '#40bcd4', '#9e9e9e', '#3ca9f4']
 
 def plot_funnel(phases, values):
     n_phase = len(phases)
@@ -150,6 +150,24 @@ def plot_funnel(phases, values):
 
     fig = go.Figure(data=data, layout=layout)
     iplot(fig, show_link=False)
+
+    
+# new_funnel
+from plotly import graph_objects as go
+
+def plot_new_funnel(phases, values):
+
+    fig = go.Figure(go.Funnel(
+        y = phases,
+        x = values,
+        textposition = "inside",
+        textinfo = "value+percent initial",
+        opacity = 0.85, marker = {"color": colors[:len(phases)],
+                                 },
+        connector = {"line": {"color": "royalblue", "dash": "dot", "width": 3}})
+        )
+
+    fig.show()
 
 # Простая функция для построения графиков в plotly 
 
