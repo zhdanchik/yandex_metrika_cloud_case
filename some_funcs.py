@@ -14,6 +14,23 @@ class simple_ch_client():
         self.CH_PASS = CH_PASS
         self.cacert = cacert
 
+    def get_version(self):
+        url = '{host}/?database={db}&query={query}'.format(
+                host=self.CH_HOST,
+                db='default',
+                query='SELECT version()')
+
+        auth = {
+                'X-ClickHouse-User': self.CH_USER,
+                'X-ClickHouse-Key': self.CH_PASS,
+            }
+
+        rs = requests.get(url, headers=auth, verify=self.cacert)
+        # 
+        rs.raise_for_status()
+
+        print(rs.text)
+
     def get_clickhouse_data(self, query, connection_timeout = 1500):
         r = requests.post(self.CH_HOST, params = {'query': query, 'user': self.CH_USER, 'password':self.CH_PASS}, timeout = connection_timeout, verify=self.cacert)
         if r.status_code == 200:
@@ -213,3 +230,24 @@ def highlight_vals(val):
     if val > 10:
         return 'background-color: rgba(249, 204, 208, %f)' % p
     return 'background-color: rgba(252, 229, 231, %f)' % p
+
+#-----------Функция для скачивания файла с ЯНждекс.Диска---------
+
+import requests
+from urllib.parse import urlencode
+
+def get_file_from_yadisk(file_link, file_name):
+    base_url = 'https://cloud-api.yandex.net/v1/disk/public/resources/download?'
+    final_url = base_url + urlencode(dict(public_key=file_link))
+    response = requests.get(final_url)
+    download_url = response.json()['href']
+    
+    download_response = requests.get(download_url)
+    
+    if download_response.status_code == 200:
+        print('OK <200>')
+    else :
+        raise(BaseException("Some error while downloading file"))
+    
+    with open(file_name, 'wb') as f:   # Здесь укажите нужный путь к файлу
+        f.write(download_response.content)
